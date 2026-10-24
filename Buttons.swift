@@ -10,12 +10,12 @@ import AppKit
 private let factorySlots: [UInt32] = [0x0111, 0x0211, 0x0411, 0x0811, 0x1011, 0x0141, 0x0241, 0x0450] + Array(repeating: UInt32(0x0150), count: 12)
 // Posição 6 = botão de cima perto do scroll (Mark6 do Cfg.ini fica ao lado do Mark3, o scroll); posição 7 = o de trás.
 // De fábrica o da frente aumenta o DPI e o de trás diminui, conferido no mouse.
-private let buttonNames = ["Esquerdo", "Direito", "Meio (scroll)", "Lateral: voltar", "Lateral: avançar", "Superior, perto do scroll", "Superior, atrás"]
+private let buttonNames = ["Left", "Right", "Middle (wheel)", "Side: back", "Side: forward", "Top, near the wheel", "Top, rear"].map(tr)
 private let leftClick: UInt32 = 0x0111
 private let functions: [(title: String, code: UInt32)] = [
-    ("Clique esquerdo", leftClick), ("Clique direito", 0x0211), ("Clique do meio", 0x0411),
-    ("Voltar", 0x0811), ("Avançar", 0x1011), ("Rolar para cima", 0x0112), ("Rolar para baixo", 0xFF12),
-    ("Aumentar DPI", 0x0141), ("Diminuir DPI", 0x0241),
+    (tr("Left click"), leftClick), (tr("Right click"), 0x0211), (tr("Middle click"), 0x0411),
+    (tr("Back"), 0x0811), (tr("Forward"), 0x1011), (tr("Scroll up"), 0x0112), (tr("Scroll down"), 0xFF12),
+    (tr("DPI up"), 0x0141), (tr("DPI down"), 0x0241),
 ]
 // Atalho de teclado: [0x21, modificadores, tecla, 0], com modificadores e tecla em códigos HID.
 private let shortcutType: UInt32 = 0x21
@@ -34,8 +34,8 @@ private let keys: [(title: String, code: UInt32)] = {
         list.append((title: "F\(function)", code: UInt32(0x39 + function)))
     }
     list += [
-        (title: "Enter", code: 0x28), (title: "Esc", code: 0x29), (title: "Apagar ⌫", code: 0x2A), (title: "Tab", code: 0x2B),
-        (title: "Espaço", code: 0x2C), (title: "Delete ⌦", code: 0x4C), (title: "Home", code: 0x4A), (title: "End", code: 0x4D),
+        (title: "Enter", code: 0x28), (title: "Esc", code: 0x29), (title: tr("Backspace ⌫"), code: 0x2A), (title: "Tab", code: 0x2B),
+        (title: tr("Space"), code: 0x2C), (title: "Delete ⌦", code: 0x4C), (title: "Home", code: 0x4A), (title: "End", code: 0x4D),
         (title: "Page Up", code: 0x4B), (title: "Page Down", code: 0x4E),
         (title: "→", code: 0x4F), (title: "←", code: 0x50), (title: "↓", code: 0x51), (title: "↑", code: 0x52),
     ]
@@ -56,14 +56,14 @@ final class ButtonsWindowController: NSWindowController {
     init(mouse: AppDelegate) {
         self.mouse = mouse
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 380), styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        window.title = "Botões do mouse"
+        window.title = tr("Mouse buttons")
         window.isReleasedWhenClosed = false
         super.init(window: window)
 
         var rows: [[NSView]] = []
         for name in buttonNames {
             let functionPopup = NSPopUpButton()
-            functionPopup.addItems(withTitles: functions.map { $0.title } + ["Atalho de teclado"])
+            functionPopup.addItems(withTitles: functions.map { $0.title } + [tr("Keyboard shortcut")])
             functionPopup.target = self
             functionPopup.action = #selector(updateShortcutControls)
             let checks = modifiers.map { NSButton(checkboxWithTitle: $0.title, target: nil, action: nil) }
@@ -81,10 +81,10 @@ final class ButtonsWindowController: NSWindowController {
         grid.rowSpacing = 10
         grid.columnSpacing = 12
 
-        let applyButton = NSButton(title: "Gravar no mouse", target: self, action: #selector(apply))
+        let applyButton = NSButton(title: tr("Write to mouse"), target: self, action: #selector(apply))
         applyButton.keyEquivalent = "\r"
         let buttons = NSStackView(views: [
-            NSButton(title: "Padrão de fábrica", target: self, action: #selector(loadFactory)),
+            NSButton(title: tr("Factory default"), target: self, action: #selector(loadFactory)),
             applyButton,
         ])
         statusLabel.preferredMaxLayoutWidth = 640
@@ -100,15 +100,15 @@ final class ButtonsWindowController: NSWindowController {
 
         if let data = try? Data(contentsOf: savedFile), let saved = try? JSONDecoder().decode([UInt32].self, from: data), saved.count == buttonSlots {
             show(saved)
-            statusLabel.stringValue = "O mouse não deixa ler os botões. Esta é a última configuração gravada por este app."
+            statusLabel.stringValue = tr("The mouse does not allow reading the buttons. This is the last layout written by this app.")
         } else {
             show(factorySlots)
-            statusLabel.stringValue = "O mouse não deixa ler os botões. Este é o padrão de fábrica, que é o que o mouse tem se nunca foi alterado."
+            statusLabel.stringValue = tr("The mouse does not allow reading the buttons. This is the factory layout, which is what the mouse has if it was never changed.")
         }
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) não é usado")
+        fatalError("init(coder:) is not used")
     }
 
     private func show(_ newSlots: [UInt32]) {
@@ -141,7 +141,7 @@ final class ButtonsWindowController: NSWindowController {
 
     @objc private func loadFactory() {
         show(factorySlots)
-        statusLabel.stringValue = "Padrão de fábrica carregado na janela. Clique em \"Gravar no mouse\" para aplicar."
+        statusLabel.stringValue = tr("Factory layout loaded in the window. Click \"Write to mouse\" to apply it.")
     }
 
     @objc private func apply() {
@@ -153,7 +153,7 @@ final class ButtonsWindowController: NSWindowController {
             } else if choice == functions.count {
                 let key = keyPopups[index].indexOfSelectedItem
                 guard key >= 0 else {
-                    statusLabel.stringValue = "Escolha a tecla do atalho de \"\(buttonNames[index])\"."
+                    statusLabel.stringValue = String(format: tr("Choose the shortcut key for \"%@\"."), buttonNames[index])
                     return
                 }
                 let mods = zip(modifierChecks[index], modifiers).reduce(UInt32(0)) { $0 | ($1.0.state == .on ? $1.1.bit : 0) }
@@ -162,7 +162,7 @@ final class ButtonsWindowController: NSWindowController {
         }
         // Sem clique esquerdo o mouse fica inutilizável; o software oficial também recusa (tc_msg1 do text.xml).
         guard updated.prefix(buttonNames.count).contains(leftClick) else {
-            statusLabel.stringValue = "Pelo menos um botão precisa ficar com \"Clique esquerdo\". Nada foi gravado."
+            statusLabel.stringValue = tr("At least one button must be set to \"Left click\". Nothing was written.")
             return
         }
         if let error = mouse.writeButtons(updated) {
@@ -173,9 +173,9 @@ final class ButtonsWindowController: NSWindowController {
         do {
             try FileManager.default.createDirectory(at: mouse.backupFolder, withIntermediateDirectories: true)
             try JSONEncoder().encode(updated).write(to: savedFile)
-            statusLabel.stringValue = "Gravado. O mouse não deixa ler os botões de volta: teste cada um."
+            statusLabel.stringValue = tr("Written. The mouse does not allow reading the buttons back: test each one.")
         } catch {
-            statusLabel.stringValue = "Gravado no mouse, mas não consegui guardar a configuração no Mac (\(error.localizedDescription))."
+            statusLabel.stringValue = String(format: tr("Written to the mouse, but could not save the layout on the Mac (%@)."), error.localizedDescription)
         }
     }
 }

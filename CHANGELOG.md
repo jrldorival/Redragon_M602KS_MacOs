@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-10-24
+
+### Added
+
+- English interface. The app follows the macOS language: English by default, Brazilian Portuguese when macOS is set to Portuguese.
+- Standard macOS localization files (`Localization/<language>.lproj/Localizable.strings`), so new languages can be added without changing the code.
+
+### Changed
+
+- `build.sh` and `criar-certificado.sh` print their messages in English.
+
 ## [1.0.0] - 2026-10-24
 
 First public release.
@@ -20,4 +31,5 @@ First public release.
 - App icon, and the app version shown in the menu.
 - Documentation of the HID protocol (battery, identification, settings block, buttons).
 
+[1.1.0]: https://github.com/jrldorival/Redragon_M602KS_MacOs/releases/tag/v1.1.0
 [1.0.0]: https://github.com/jrldorival/Redragon_M602KS_MacOs/releases/tag/v1.0.0

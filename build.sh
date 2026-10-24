@@ -25,11 +25,16 @@ for SIZE in 16 32 128 256 512; do
 done
 iconutil -c icns "$ICONSET" -o "$BUNDLE/Contents/Resources/AppIcon.icns"
 
+# Traduções da interface: o inglês é a base (chaves no código) e cada <idioma>.lproj traz um idioma.
+cp -R Localization/*.lproj "$BUNDLE/Contents/Resources/"
+
 cat > "$BUNDLE/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
     <key>CFBundleExecutable</key>
     <string>RedragonBattery</string>
     <key>CFBundleIconFile</key>
@@ -61,13 +66,13 @@ IDENTITIES="$(security find-identity -p codesigning 2>/dev/null || true)"
 if grep -q "\"$IDENTITY\"" <<< "$IDENTITIES"; then
     codesign --force --sign "$IDENTITY" "$BUNDLE"
 else
-    echo "Aviso: certificado \"$IDENTITY\" não encontrado (rode: bash criar-certificado.sh)."
-    echo "Assinando ad-hoc: a permissão de Monitoramento de Entrada terá de ser dada de novo a cada compilação."
+    echo "Warning: certificate \"$IDENTITY\" not found (run: bash criar-certificado.sh)."
+    echo "Signing ad hoc: the Input Monitoring permission will have to be granted again after every build."
     codesign --force --sign - "$BUNDLE"
 fi
 
 rm -rf "$APP"
 mv "$BUNDLE" "$APP"
 
-echo "Pronto: $(pwd)/$APP (versão $VERSION)"
+echo "Done: $(pwd)/$APP (version $VERSION)"
 codesign -dv "$APP" 2>&1 | grep -E "^(Authority|Signature)=" || true

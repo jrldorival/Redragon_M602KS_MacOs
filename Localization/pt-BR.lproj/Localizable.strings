@@ -1,0 +1,107 @@
+/* Tradução para português do Brasil. A chave é o texto em inglês usado no código (função tr). */
+
+/* Menu e barra */
+"Looking for the mouse…" = "Procurando o mouse…";
+"Refresh now" = "Atualizar agora";
+"Mouse settings…" = "Configurações do mouse…";
+"Mouse buttons…" = "Botões do mouse…";
+"Save settings backup…" = "Salvar backup da configuração…";
+"Open Input Monitoring…" = "Abrir Monitoramento de Entrada…";
+"Quit" = "Sair";
+"Response:" = "Resposta:";
+"No Input Monitoring permission" = "Sem permissão de Monitoramento de Entrada";
+"No access to the receiver" = "Sem acesso ao receptor";
+"Receiver not found" = "Receptor não encontrado";
+"On cable — the mouse does not report the charge while charging" = "No cabo — o mouse não informa a carga enquanto carrega";
+" (last wireless reading: %ld%%)" = " (último valor sem fio: %ld%%)";
+"No response from the mouse (off or asleep?)" = "Mouse sem resposta (desligado ou dormindo?)";
+" (current reading: %ld%%)" = " (leitura agora: %ld%%)";
+"Wireless — %ld%%" = "Sem fio — %ld%%";
+"SetFeature failed (0x%08X)" = "SetFeature falhou (0x%08X)";
+"GetFeature failed (0x%08X)" = "GetFeature falhou (0x%08X)";
+
+/* Leitura, gravação e backup */
+"Could not read the settings" = "Não consegui ler a configuração";
+"Could not save the backup" = "Não consegui salvar o backup";
+"Receiver not found. Connect the receiver and turn the mouse on." = "Receptor não encontrado. Conecte o receptor e ligue o mouse.";
+"Read failed (send 0x%08X, read 0x%08X)." = "A leitura falhou (envio 0x%08X, leitura 0x%08X).";
+"The settings read from the mouse have an unexpected format." = "O bloco lido não tem o formato esperado.";
+"Invalid settings; nothing was written." = "Bloco inválido; nada foi gravado.";
+"Write failed (0x%08X)." = "A gravação falhou (0x%08X).";
+"Written, but could not read it back to verify:" = "Gravei, mas não consegui ler de volta para conferir:";
+"The mouse does not match what was written. Restore the backup." = "O mouse ficou diferente do que foi gravado. Restaure o backup.";
+"Invalid button layout; nothing was written." = "Matriz inválida; nada foi gravado.";
+"Receiver not found; nothing was written." = "Receptor não encontrado; nada foi gravado.";
+"The device did not identify itself as an M602-KS; nothing was written." = "O dispositivo não se identificou como M602-KS; nada foi gravado.";
+
+/* Janela de configurações */
+"Mouse settings" = "Configurações do mouse";
+"Polling rate" = "Taxa de resposta";
+"DPI levels" = "Níveis de DPI";
+"Active level" = "Nível ativo";
+"Level %ld" = "Nível %ld";
+"Lighting effect" = "Efeito de LED";
+"Speed" = "Velocidade";
+"Brightness" = "Brilho";
+"Direction" = "Sentido";
+"Effect color" = "Cor do efeito";
+"From the tip backwards" = "Da ponta para trás";
+"1 (slow)" = "1 (lenta)";
+"3 (fast)" = "3 (rápida)";
+"1 (dim)" = "1 (fraco)";
+"4 (bright)" = "4 (forte)";
+"Colorful Streaming" = "Fluxo colorido";
+"Steady" = "Cor fixa";
+"Breathing" = "Respiração";
+"Colorful Tail" = "Cauda colorida";
+"Neon" = "Neon";
+"Colorful Steady" = "Colorido fixo";
+"Flicker" = "Piscando";
+"Stars Twinkle" = "Estrelas";
+"Wave" = "Onda";
+"Off" = "Desligado";
+"Read from mouse" = "Ler do mouse";
+"Restore backup…" = "Restaurar backup…";
+"Apply" = "Aplicar";
+"Read failed." = "A leitura falhou.";
+"Read from the mouse." = "Lido do mouse.";
+"The mouse has %ld DPI levels; this window edits 1 to %ld, so it will not write." = "O mouse tem %ld níveis de DPI; esta janela edita de 1 a %ld, então não vai gravar.";
+"Choose the polling rate, the effect and the DPI of every active level." = "Escolha a taxa, o efeito e o DPI de todos os níveis ativos.";
+"Nothing changed." = "Nada mudou.";
+"Nothing was written: backing up the current settings failed (%@)." = "Não gravei: o backup do estado atual falhou (%@).";
+"Backup of the previous settings: %@" = "Backup do estado anterior: %@";
+"Written and verified. Backup of the previous settings: %@" = "Gravado e conferido. Backup do estado anterior: %@";
+"Choose a .bin backup" = "Escolha um backup .bin";
+"Invalid file: a .bin backup has 146 bytes." = "Arquivo inválido: o backup .bin tem 146 bytes.";
+"Backup %@ restored and verified." = "Backup %@ restaurado e conferido.";
+
+/* Janela de botões */
+"Mouse buttons" = "Botões do mouse";
+"Left" = "Esquerdo";
+"Right" = "Direito";
+"Middle (wheel)" = "Meio (scroll)";
+"Side: back" = "Lateral: voltar";
+"Side: forward" = "Lateral: avançar";
+"Top, near the wheel" = "Superior, perto do scroll";
+"Top, rear" = "Superior, atrás";
+"Left click" = "Clique esquerdo";
+"Right click" = "Clique direito";
+"Middle click" = "Clique do meio";
+"Back" = "Voltar";
+"Forward" = "Avançar";
+"Scroll up" = "Rolar para cima";
+"Scroll down" = "Rolar para baixo";
+"DPI up" = "Aumentar DPI";
+"DPI down" = "Diminuir DPI";
+"Keyboard shortcut" = "Atalho de teclado";
+"Backspace ⌫" = "Apagar ⌫";
+"Space" = "Espaço";
+"Write to mouse" = "Gravar no mouse";
+"Factory default" = "Padrão de fábrica";
+"The mouse does not allow reading the buttons. This is the last layout written by this app." = "O mouse não deixa ler os botões. Esta é a última configuração gravada por este app.";
+"The mouse does not allow reading the buttons. This is the factory layout, which is what the mouse has if it was never changed." = "O mouse não deixa ler os botões. Este é o padrão de fábrica, que é o que o mouse tem se nunca foi alterado.";
+"Factory layout loaded in the window. Click \"Write to mouse\" to apply it." = "Padrão de fábrica carregado na janela. Clique em \"Gravar no mouse\" para aplicar.";
+"Choose the shortcut key for \"%@\"." = "Escolha a tecla do atalho de \"%@\".";
+"At least one button must be set to \"Left click\". Nothing was written." = "Pelo menos um botão precisa ficar com \"Clique esquerdo\". Nada foi gravado.";
+"Written. The mouse does not allow reading the buttons back: test each one." = "Gravado. O mouse não deixa ler os botões de volta: teste cada um.";
+"Written to the mouse, but could not save the layout on the Mac (%@)." = "Gravado no mouse, mas não consegui guardar a configuração no Mac (%@).";

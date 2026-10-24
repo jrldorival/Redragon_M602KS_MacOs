@@ -2,7 +2,7 @@
 
 A macOS menu bar app for the **Redragon M602-KS (Griffin)** wireless mouse. It shows the battery level and lets you change the mouse settings that the official software only allows on Windows: DPI levels and colors, polling rate, lighting effects and button assignments.
 
-**Version:** 1.0.0 · see [CHANGELOG.md](CHANGELOG.md)
+**Version:** 1.1.0 · see [CHANGELOG.md](CHANGELOG.md)
 
 > [!WARNING]
 > **Unofficial project. Use at your own risk.** This app is not affiliated with, endorsed by or supported by Redragon. It writes settings directly to the mouse. Read the [Disclaimer](#disclaimer) before using it.
@@ -10,14 +10,13 @@ A macOS menu bar app for the **Redragon M602-KS (Griffin)** wireless mouse. It s
 ## Features
 
 - **Battery level in the menu bar**: a battery icon that fills according to the charge, followed by the percentage. It refreshes every 60 seconds, whenever the receiver or the cable is connected or disconnected, and on demand.
-- **Mouse settings** (window "Configurações do mouse…"):
+- **Mouse settings** (window "Mouse settings…"):
   - polling rate: 125, 250, 500 or 1000 Hz;
   - 1 to 5 DPI levels, from 250 to 8000 DPI, each with its own color;
   - lighting effect, with speed, brightness, direction and color where the effect supports them, or lights off.
 - **Safe writes**: before writing, the app checks that the device identifies itself as an M602-KS and saves a backup of the current settings. After writing, it reads the settings back to confirm them. Any backup can be restored.
-- **Button assignments** (window "Botões do mouse…"): left, right and middle click, back, forward, scroll up and down, DPI up and down, or a keyboard shortcut (⌃ ⇧ ⌥ ⌘ + one key) for each of the 7 programmable buttons, plus a factory-default option.
-
-The app interface is in Brazilian Portuguese.
+- **Button assignments** (window "Mouse buttons…"): left, right and middle click, back, forward, scroll up and down, DPI up and down, or a keyboard shortcut (⌃ ⇧ ⌥ ⌘ + one key) for each of the 7 programmable buttons, plus a factory-default option.
+- **Languages**: the interface follows the macOS language. It is in English by default and in Brazilian Portuguese when macOS is set to Portuguese. See [Translations](#translations) to add another language.
 
 ## Requirements
 
@@ -70,7 +69,7 @@ This creates a self-signed code signing certificate named **"Redragon Battery Lo
 bash build.sh
 ```
 
-The last lines should show `Pronto: …/RedragonBattery.app (versão 1.0.0)` and `Authority=Redragon Battery Local`. If a dialog asks whether `codesign` may use the keychain key, enter your password and choose **Always Allow**.
+The last lines should show `Done: …/RedragonBattery.app (version 1.1.0)` and `Authority=Redragon Battery Local`. If a dialog asks whether `codesign` may use the keychain key, enter your password and choose **Always Allow**.
 
 ### 5. Install
 
@@ -83,9 +82,9 @@ To start it automatically, add it to **System Settings › General › Login Ite
 
 ### 6. Allow Input Monitoring
 
-On the first launch, macOS asks for **Input Monitoring** permission. Allow it, then quit the app (menu › Sair) and open it again. The permission is required because the mouse receiver also presents itself as a keyboard, which is used for the mouse macros.
+On the first launch, macOS asks for **Input Monitoring** permission. Allow it, then quit the app (menu › Quit) and open it again. The permission is required because the mouse receiver also presents itself as a keyboard, which is used for the mouse macros.
 
-If the menu shows "Sem permissão de Monitoramento de Entrada" or "SetFeature falhou (0xE00002CD)", the permission does not match the current signature. Reset it and open the app again:
+If the menu shows "No Input Monitoring permission" or "SetFeature failed (0xE00002CD)", the permission does not match the current signature. Reset it and open the app again:
 
 ```bash
 tccutil reset ListenEvent local.redragon-battery
@@ -123,11 +122,11 @@ Click the mouse icon in the menu bar.
 
 | Menu item | What it does |
 |---|---|
-| Atualizar agora | Reads the battery now. |
-| Configurações do mouse… | Polling rate, DPI levels and colors, lighting effect. **Aplicar** writes and verifies; **Restaurar backup…** restores a saved backup. |
-| Botões do mouse… | Function of each programmable button. **Padrão de fábrica** loads the factory layout; **Gravar no mouse** writes it. |
-| Salvar backup da configuração… | Reads the mouse settings and saves a backup without changing anything. |
-| Abrir Monitoramento de Entrada… | Opens the Input Monitoring page in System Settings. |
+| Refresh now | Reads the battery now. |
+| Mouse settings… | Polling rate, DPI levels and colors, lighting effect. **Apply** writes and verifies; **Restore backup…** restores a saved backup. |
+| Mouse buttons… | Function of each programmable button. **Factory default** loads the factory layout; **Write to mouse** writes it. |
+| Save settings backup… | Reads the mouse settings and saves a backup without changing anything. |
+| Open Input Monitoring… | Opens the Input Monitoring page in System Settings. |
 
 Backups are saved in `~/Library/Application Support/RedragonBattery/`. Use the `general-<date>.bin` files to restore; the `.txt` files with the same name are the same data, readable as text.
 
@@ -137,7 +136,7 @@ The battery level the mouse reports varies by a few points from one reading to t
 
 - **No battery level while charging.** On the cable, the mouse reports "cable" without a percentage, and the receiver keeps repeating the last wireless value, which stays the same while the mouse charges. The official software behaves the same way. The menu shows a charging icon and the last wireless value.
 - **A mouse that is turned off is not detected.** The receiver keeps answering with the last known value.
-- **Button assignments cannot be read from the mouse.** The hardware has no read command for them, so there is no backup of the previous state and no verification after writing. The app remembers what it wrote last (`botoes.json`), and **Padrão de fábrica** restores the original layout. Like the official software, it refuses to write a layout without a left click.
+- **Button assignments cannot be read from the mouse.** The hardware has no read command for them, so there is no backup of the previous state and no verification after writing. The app remembers what it wrote last (`botoes.json`), and **Factory default** restores the original layout. Like the official software, it refuses to write a layout without a left click.
 - **Macros are not supported.** The write command is known, but the macro data format was not decoded. Keyboard shortcuts cover the common cases.
 - DPI values above 4000 follow the same conversion as the factory values but were not tested on the mouse.
 - The LED switch and the Bluetooth button under the mouse are hardware controls and cannot be changed by software.
@@ -151,6 +150,16 @@ The communication protocol was obtained by studying how the official Windows sof
 This app writes settings directly to the mouse's memory. It checks the device identity, keeps backups and reads settings back where the hardware allows it, but a wrong or interrupted write may still leave the mouse misconfigured. Button assignments cannot be read back at all.
 
 **This software is provided "as is", without warranty of any kind. The author is not responsible for any damage, malfunction, data loss, loss of warranty, or any misuse resulting from the use of this software. By using it, you accept full responsibility for its use.** See also the [LICENSE](LICENSE).
+
+## Translations
+
+The interface texts are written in English in the code and translated by standard macOS localization files. To add a language:
+
+1. Copy `Localization/pt-BR.lproj` to a folder named after the language code, for example `Localization/es.lproj` or `Localization/fr.lproj`.
+2. In its `Localizable.strings`, keep the English text on the left of each `=` and translate the text on the right. Keep placeholders such as `%ld`, `%@` and `%08X` in the translation.
+3. Run `bash build.sh`. The new language is picked automatically when macOS is set to it.
+
+Pull requests with new translations are welcome.
 
 ## Versioning
 
@@ -166,6 +175,7 @@ The project follows [Semantic Versioning](https://semver.org/). The version numb
 | `build.sh` | Compiles, generates the icon, signs and creates `RedragonBattery.app`. |
 | `criar-certificado.sh` | Creates the local signing certificate (once). |
 | `icon.png` | App icon source (1024 × 1024). |
+| `Localization/` | Interface translations (`<language>.lproj/Localizable.strings`). |
 | `VERSION` | Current version. |
 
 ## Protocol

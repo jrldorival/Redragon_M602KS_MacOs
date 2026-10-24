@@ -19,8 +19,8 @@ private let maxLevels = 5
 private let dpiSlots = 8
 private let dpiStep = 250
 private let dpiValues = Array(stride(from: dpiStep, through: 8000, by: dpiStep))
-// Nomes do text.xml do software oficial (tc_led_mode1 a tc_led_mode10); o último é gravado como 0.
-private let effects = ["Fluxo colorido", "Cor fixa", "Respiração", "Cauda colorida", "Neon", "Colorido fixo", "Piscando", "Estrelas", "Onda", "Desligado"]
+// Nomes em inglês do text.xml do software oficial (tc_led_mode1 a tc_led_mode10); o último é gravado como 0.
+private let effects = ["Colorful Streaming", "Steady", "Breathing", "Colorful Tail", "Neon", "Colorful Steady", "Flicker", "Stars Twinkle", "Wave", "Off"].map(tr)
 // Na mesma ordem: byte de parâmetros de cada efeito no bloco e o que o software oficial deixa mudar nele (LedOpt1 a LedOpt10 do Cfg.ini).
 private let effectParams: [(offset: Int, speed: Bool, brightness: Bool)] = [
     (62, true, false), (64, false, true), (68, true, false), (91, true, false), (92, true, false),
@@ -40,15 +40,15 @@ final class SettingsWindowController: NSWindowController {
     private let effectPopup = NSPopUpButton()
     private let speedPopup = NSPopUpButton()
     private let brightnessPopup = NSPopUpButton()
-    private let directionCheck = NSButton(checkboxWithTitle: "Da ponta para trás", target: nil, action: nil)
+    private let directionCheck = NSButton(checkboxWithTitle: tr("From the tip backwards"), target: nil, action: nil)
     private let steadyColorWell = NSColorWell()
     private let statusLabel = NSTextField(wrappingLabelWithString: "")
-    private let applyButton = NSButton(title: "Aplicar", target: nil, action: nil)
+    private let applyButton = NSButton(title: tr("Apply"), target: nil, action: nil)
 
     init(mouse: AppDelegate) {
         self.mouse = mouse
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 480), styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        window.title = "Configurações do mouse"
+        window.title = tr("Mouse settings")
         window.isReleasedWhenClosed = false
         super.init(window: window)
 
@@ -59,15 +59,15 @@ final class SettingsWindowController: NSWindowController {
         effectPopup.addItems(withTitles: effects)
         effectPopup.target = self
         effectPopup.action = #selector(updateEffectControls)
-        speedPopup.addItems(withTitles: ["1 (lenta)", "2", "3 (rápida)"])
-        brightnessPopup.addItems(withTitles: ["1 (fraco)", "2", "3", "4 (forte)"])
+        speedPopup.addItems(withTitles: [tr("1 (slow)"), "2", tr("3 (fast)")])
+        brightnessPopup.addItems(withTitles: [tr("1 (dim)"), "2", "3", tr("4 (bright)")])
         steadyColorWell.widthAnchor.constraint(equalToConstant: 44).isActive = true
         steadyColorWell.heightAnchor.constraint(equalToConstant: 24).isActive = true
 
         var rows: [[NSView]] = [
-            [NSTextField(labelWithString: "Taxa de resposta"), ratePopup],
-            [NSTextField(labelWithString: "Níveis de DPI"), levelCountPopup],
-            [NSTextField(labelWithString: "Nível ativo"), activeLevelPopup],
+            [NSTextField(labelWithString: tr("Polling rate")), ratePopup],
+            [NSTextField(labelWithString: tr("DPI levels")), levelCountPopup],
+            [NSTextField(labelWithString: tr("Active level")), activeLevelPopup],
         ]
         for level in 1...maxLevels {
             let dpiPopup = NSPopUpButton()
@@ -77,13 +77,13 @@ final class SettingsWindowController: NSWindowController {
             well.heightAnchor.constraint(equalToConstant: 24).isActive = true
             dpiPopups.append(dpiPopup)
             colorWells.append(well)
-            rows.append([NSTextField(labelWithString: "Nível \(level)"), NSStackView(views: [dpiPopup, well])])
+            rows.append([NSTextField(labelWithString: String(format: tr("Level %ld"), level)), NSStackView(views: [dpiPopup, well])])
         }
-        rows.append([NSTextField(labelWithString: "Efeito de LED"), effectPopup])
-        rows.append([NSTextField(labelWithString: "Velocidade"), speedPopup])
-        rows.append([NSTextField(labelWithString: "Brilho"), brightnessPopup])
-        rows.append([NSTextField(labelWithString: "Sentido"), directionCheck])
-        rows.append([NSTextField(labelWithString: "Cor do efeito"), steadyColorWell])
+        rows.append([NSTextField(labelWithString: tr("Lighting effect")), effectPopup])
+        rows.append([NSTextField(labelWithString: tr("Speed")), speedPopup])
+        rows.append([NSTextField(labelWithString: tr("Brightness")), brightnessPopup])
+        rows.append([NSTextField(labelWithString: tr("Direction")), directionCheck])
+        rows.append([NSTextField(labelWithString: tr("Effect color")), steadyColorWell])
         let grid = NSGridView(views: rows)
         grid.column(at: 0).xPlacement = .trailing
         grid.rowSpacing = 10
@@ -93,8 +93,8 @@ final class SettingsWindowController: NSWindowController {
         applyButton.action = #selector(apply)
         applyButton.keyEquivalent = "\r"
         let buttons = NSStackView(views: [
-            NSButton(title: "Ler do mouse", target: self, action: #selector(reload)),
-            NSButton(title: "Restaurar backup…", target: self, action: #selector(restoreBackup)),
+            NSButton(title: tr("Read from mouse"), target: self, action: #selector(reload)),
+            NSButton(title: tr("Restore backup…"), target: self, action: #selector(restoreBackup)),
             applyButton,
         ])
         statusLabel.preferredMaxLayoutWidth = 420
@@ -110,7 +110,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) não é usado")
+        fatalError("init(coder:) is not used")
     }
 
     @objc func reload() {
@@ -118,7 +118,7 @@ final class SettingsWindowController: NSWindowController {
         guard let block = result.block else {
             self.block = []
             applyButton.isEnabled = false
-            statusLabel.stringValue = result.error ?? "A leitura falhou."
+            statusLabel.stringValue = result.error ?? tr("Read failed.")
             return
         }
         self.block = block
@@ -140,7 +140,7 @@ final class SettingsWindowController: NSWindowController {
         // Fora do que a janela sabe editar, gravar mudaria o mouse sem a pessoa ver; nesse caso só mostra.
         let editable = (1...maxLevels).contains(count)
         applyButton.isEnabled = editable
-        statusLabel.stringValue = editable ? "Lido do mouse." : "O mouse tem \(count) níveis de DPI; esta janela edita de 1 a \(maxLevels), então não vai gravar."
+        statusLabel.stringValue = editable ? tr("Read from the mouse.") : String(format: tr("The mouse has %ld DPI levels; this window edits 1 to %ld, so it will not write."), count, maxLevels)
     }
 
     // Mostra o que está gravado para o efeito escolhido e libera só o que o software oficial deixa mudar nele.
@@ -180,7 +180,7 @@ final class SettingsWindowController: NSWindowController {
         let count = levelCountPopup.indexOfSelectedItem + 1
         guard ratePopup.indexOfSelectedItem >= 0, effectPopup.indexOfSelectedItem >= 0,
               (0..<count).allSatisfy({ dpiPopups[$0].indexOfSelectedItem >= 0 }) else {
-            statusLabel.stringValue = "Escolha a taxa, o efeito e o DPI de todos os níveis ativos."
+            statusLabel.stringValue = tr("Choose the polling rate, the effect and the DPI of every active level.")
             return
         }
 
@@ -220,38 +220,38 @@ final class SettingsWindowController: NSWindowController {
         }
 
         guard updated != block else {
-            statusLabel.stringValue = "Nada mudou."
+            statusLabel.stringValue = tr("Nothing changed.")
             return
         }
         let backup: URL
         do {
             backup = try mouse.saveBackup(block: block)
         } catch {
-            statusLabel.stringValue = "Não gravei: o backup do estado atual falhou (\(error.localizedDescription))."
+            statusLabel.stringValue = String(format: tr("Nothing was written: backing up the current settings failed (%@)."), error.localizedDescription)
             return
         }
         if let error = mouse.writeGeneral(updated) {
-            statusLabel.stringValue = "\(error) Backup do estado anterior: \(backup.lastPathComponent)"
+            statusLabel.stringValue = error + " " + String(format: tr("Backup of the previous settings: %@"), backup.lastPathComponent)
         } else {
             block = updated
-            statusLabel.stringValue = "Gravado e conferido. Backup do estado anterior: \(backup.lastPathComponent)"
+            statusLabel.stringValue = String(format: tr("Written and verified. Backup of the previous settings: %@"), backup.lastPathComponent)
         }
     }
 
     @objc private func restoreBackup() {
         let panel = NSOpenPanel()
         panel.directoryURL = mouse.backupFolder
-        panel.message = "Escolha um backup .bin"
+        panel.message = tr("Choose a .bin backup")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         guard let data = try? Data(contentsOf: url), data.count == generalSize else {
-            statusLabel.stringValue = "Arquivo inválido: o backup .bin tem 146 bytes."
+            statusLabel.stringValue = tr("Invalid file: a .bin backup has 146 bytes.")
             return
         }
         if let error = mouse.writeGeneral([UInt8](data)) {
             statusLabel.stringValue = error
         } else {
             reload()
-            statusLabel.stringValue = "Backup \(url.lastPathComponent) restaurado e conferido."
+            statusLabel.stringValue = String(format: tr("Backup %@ restored and verified."), url.lastPathComponent)
         }
     }
 }

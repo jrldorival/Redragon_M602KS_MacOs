@@ -7,7 +7,7 @@ NAME="Redragon Battery Local"
 KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
 
 if security find-certificate -c "$NAME" "$KEYCHAIN" >/dev/null 2>&1; then
-    echo "O certificado \"$NAME\" já existe nas Chaves. Nada a fazer."
+    echo "The certificate \"$NAME\" already exists in the keychain. Nothing to do."
     exit 0
 fi
 
@@ -35,7 +35,7 @@ CNF
 
 security import "$WORK/id.p12" -k "$KEYCHAIN" -P temporaria -T /usr/bin/codesign
 
-echo "Agora o macOS vai pedir sua senha para confiar no certificado para assinatura de código."
+echo "macOS will now ask for your password to trust the certificate for code signing."
 security add-trusted-cert -r trustRoot -p codeSign -k "$KEYCHAIN" "$WORK/cert.pem"
 
-echo "Certificado \"$NAME\" criado. Rode: bash build.sh"
+echo "Certificate \"$NAME\" created. Next: bash build.sh"

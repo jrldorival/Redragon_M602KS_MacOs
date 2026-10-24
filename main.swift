@@ -45,6 +45,11 @@ private extension Notification.Name {
     static let mouseDevicesChanged = Notification.Name("mouseDevicesChanged")
 }
 
+/// Texto da interface no idioma do macOS: a chave é o texto em inglês, e Localization/pt-BR.lproj traz o português.
+func tr(_ key: String) -> String {
+    NSLocalizedString(key, comment: "")
+}
+
 struct Reading {
     let level: Int
     let onCable: Bool
@@ -53,7 +58,7 @@ struct Reading {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
-    private let stateItem = NSMenuItem(title: "Procurando o mouse…", action: nil, keyEquivalent: "")
+    private let stateItem = NSMenuItem(title: tr("Looking for the mouse…"), action: nil, keyEquivalent: "")
     private let rawItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private var managerOpen = false
     private var recentLevels: [Int] = []
@@ -70,28 +75,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(stateItem)
         menu.addItem(rawItem)
         menu.addItem(.separator())
-        let refreshItem = NSMenuItem(title: "Atualizar agora", action: #selector(refresh), keyEquivalent: "r")
+        let refreshItem = NSMenuItem(title: tr("Refresh now"), action: #selector(refresh), keyEquivalent: "r")
         refreshItem.target = self
         menu.addItem(refreshItem)
-        let settingsItem = NSMenuItem(title: "Configurações do mouse…", action: #selector(openSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: tr("Mouse settings…"), action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
-        let buttonsItem = NSMenuItem(title: "Botões do mouse…", action: #selector(openButtons), keyEquivalent: "")
+        let buttonsItem = NSMenuItem(title: tr("Mouse buttons…"), action: #selector(openButtons), keyEquivalent: "")
         buttonsItem.target = self
         menu.addItem(buttonsItem)
-        let backupItem = NSMenuItem(title: "Salvar backup da configuração…", action: #selector(saveConfigBackup), keyEquivalent: "")
+        let backupItem = NSMenuItem(title: tr("Save settings backup…"), action: #selector(saveConfigBackup), keyEquivalent: "")
         backupItem.target = self
         menu.addItem(backupItem)
-        let privacyItem = NSMenuItem(title: "Abrir Monitoramento de Entrada…", action: #selector(openPrivacySettings), keyEquivalent: "")
+        let privacyItem = NSMenuItem(title: tr("Open Input Monitoring…"), action: #selector(openPrivacySettings), keyEquivalent: "")
         privacyItem.target = self
         menu.addItem(privacyItem)
         menu.addItem(.separator())
         // A versão vem do arquivo VERSION, que o build.sh grava no Info.plist.
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         menu.addItem(NSMenuItem(title: "Redragon Battery \(version)", action: nil, keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Sair", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: tr("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem.menu = menu
-        show(text: "…", state: "Procurando o mouse…", raw: "")
+        show(text: "…", state: tr("Looking for the mouse…"), raw: "")
 
         // No macOS a coleção de fabricante nem sempre é a principal da interface, então casa por qualquer par de usage.
         let matching = productIDs.map { pid -> [String: Any] in
@@ -127,14 +132,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !managerOpen {
             let opened = IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
             guard opened == kIOReturnSuccess else {
-                let reason = opened == kIOReturnNotPermitted ? "Sem permissão de Monitoramento de Entrada" : "Sem acesso ao receptor"
+                let reason = opened == kIOReturnNotPermitted ? tr("No Input Monitoring permission") : tr("No access to the receiver")
                 show(text: "!", state: String(format: "%@ (0x%08X)", reason, opened), raw: "")
                 return
             }
             managerOpen = true
         }
         guard let devices = IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice>, !devices.isEmpty else {
-            show(text: "–", state: "Receptor não encontrado", raw: "")
+            show(text: "–", state: tr("Receiver not found"), raw: "")
             return
         }
         // Com o cabo, o mouse pode aparecer como um segundo dispositivo além do receptor (PID 0x002E e 0x002F):
@@ -157,13 +162,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if onCable {
             // Carregando, o percentual muda de verdade; a mediana recomeça quando o cabo sair.
             recentLevels.removeAll()
-            let last = readings.first(where: { !$0.onCable }).map { " (último valor sem fio: \($0.level)%)" } ?? ""
-            show(text: "", charging: true, state: "No cabo — o mouse não informa a carga enquanto carrega\(last)", raw: raw)
+            let last = readings.first(where: { !$0.onCable }).map { String(format: tr(" (last wireless reading: %ld%%)"), $0.level) } ?? ""
+            show(text: "", charging: true, state: tr("On cable — the mouse does not report the charge while charging") + last, raw: raw)
             return
         }
         // Só a resposta "sem fio" (0x11) traz o percentual.
         guard let wireless = readings.first(where: { !$0.onCable }) else {
-            show(text: "?", state: "Mouse sem resposta (desligado ou dormindo?)", raw: raw)
+            show(text: "?", state: tr("No response from the mouse (off or asleep?)"), raw: raw)
             return
         }
         // O mouse oscila alguns pontos entre uma leitura e outra (37 → 39 → 37); a mediana segura o número exibido.
@@ -172,8 +177,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             recentLevels.removeFirst()
         }
         let level = recentLevels.sorted()[recentLevels.count / 2]
-        let detail = level == wireless.level ? "" : " (leitura agora: \(wireless.level)%)"
-        show(text: "\(level)%", percent: level, state: "Sem fio — \(level)%\(detail)", raw: raw)
+        let detail = level == wireless.level ? "" : String(format: tr(" (current reading: %ld%%)"), wireless.level)
+        show(text: "\(level)%", percent: level, state: String(format: tr("Wireless — %ld%%"), level) + detail, raw: raw)
     }
 
     @objc private func openPrivacySettings() {
@@ -202,13 +207,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func saveConfigBackup() {
         let result = readGeneral()
         guard let block = result.block else {
-            alert("Não consegui ler a configuração", result.error ?? "")
+            alert(tr("Could not read the settings"), result.error ?? "")
             return
         }
         do {
             NSWorkspace.shared.activateFileViewerSelecting([try saveBackup(block: block)])
         } catch {
-            alert("Não consegui salvar o backup", error.localizedDescription)
+            alert(tr("Could not save the backup"), error.localizedDescription)
         }
     }
 
@@ -230,16 +235,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Lê o bloco General (146 bytes); em caso de falha devolve a mensagem de erro.
     func readGeneral() -> (block: [UInt8]?, error: String?) {
         guard let link = configLink() else {
-            return (nil, "Receptor não encontrado. Conecte o receptor e ligue o mouse.")
+            return (nil, tr("Receiver not found. Connect the receiver and turn the mouse on."))
         }
         let response = request(link.command, via: link.cmd, answer: link.data, id: configReportID, size: configReportSize)
         guard response.sent == kIOReturnSuccess, response.result == kIOReturnSuccess,
               response.bytes.count >= 8 + generalSize, response.bytes[1] == link.command else {
-            return (nil, String(format: "A leitura falhou (envio 0x%08X, leitura 0x%08X).", response.sent, response.result))
+            return (nil, String(format: tr("Read failed (send 0x%08X, read 0x%08X)."), response.sent, response.result))
         }
         let block = Array(response.bytes[8..<8 + generalSize])
         guard block[0] == 0x64, block[144] == 0xA5 else {
-            return (nil, "O bloco lido não tem o formato esperado.")
+            return (nil, tr("The settings read from the mouse have an unexpected format."))
         }
         return (block, nil)
     }
@@ -247,7 +252,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Grava o bloco General e lê de volta para conferir; devolve a mensagem de erro, ou nil se o mouse ficou exatamente com o bloco gravado.
     func writeGeneral(_ block: [UInt8]) -> String? {
         guard block.count == generalSize, block[0] == 0x64, block[144] == 0xA5 else {
-            return "Bloco inválido; nada foi gravado."
+            return tr("Invalid settings; nothing was written.")
         }
         let target = writableLink()
         guard let link = target.link else {
@@ -261,21 +266,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         report.replaceSubrange(8..<8 + generalSize, with: block)
         let sent = IOHIDDeviceSetReport(link.data, kIOHIDReportTypeFeature, CFIndex(configReportID), report, report.count)
         guard sent == kIOReturnSuccess else {
-            return String(format: "A gravação falhou (0x%08X).", sent)
+            return String(format: tr("Write failed (0x%08X)."), sent)
         }
 
         let check = readGeneral()
         guard let saved = check.block else {
-            return "Gravei, mas não consegui ler de volta para conferir: \(check.error ?? "")"
+            return tr("Written, but could not read it back to verify:") + " " + (check.error ?? "")
         }
-        return saved == block ? nil : "O mouse ficou diferente do que foi gravado. Restaure o backup."
+        return saved == block ? nil : tr("The mouse does not match what was written. Restore the backup.")
     }
 
     /// Grava a matriz de botões (20 posições de 4 bytes); devolve a mensagem de erro, ou nil.
     /// O mouse não tem comando para ler a matriz, então não há conferência depois da gravação.
     func writeButtons(_ slots: [UInt32]) -> String? {
         guard slots.count == buttonSlots else {
-            return "Matriz inválida; nada foi gravado."
+            return tr("Invalid button layout; nothing was written.")
         }
         let target = writableLink()
         guard let link = target.link else {
@@ -294,17 +299,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         report[8 + buttonSlots * 4] = 0xA5
         let sent = IOHIDDeviceSetReport(link.data, kIOHIDReportTypeFeature, CFIndex(configReportID), report, report.count)
-        return sent == kIOReturnSuccess ? nil : String(format: "A gravação falhou (0x%08X).", sent)
+        return sent == kIOReturnSuccess ? nil : String(format: tr("Write failed (0x%08X)."), sent)
     }
 
     // Antes de gravar, confere a identificação como o software oficial faz ("Psd unmatched").
     private func writableLink() -> (link: ConfigLink?, error: String?) {
         guard let link = configLink() else {
-            return (nil, "Receptor não encontrado; nada foi gravado.")
+            return (nil, tr("Receiver not found; nothing was written."))
         }
         let identity = request(cmdIdentify, via: link.cmd, answer: link.cmd, id: reportID, size: reportSize)
         guard identity.bytes.count >= 6, Array(identity.bytes[2..<6]) == expectedIdentity else {
-            return (nil, "O dispositivo não se identificou como M602-KS; nada foi gravado.")
+            return (nil, tr("The device did not identify itself as an M602-KS; nothing was written."))
         }
         return (link, nil)
     }
@@ -324,7 +329,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func readPower(_ device: IOHIDDevice) -> (reading: Reading?, raw: String) {
         let sent = sendCommand(device, cmdReadPower)
         guard sent == kIOReturnSuccess else {
-            return (nil, String(format: "SetFeature falhou (0x%08X)", sent))
+            return (nil, String(format: tr("SetFeature failed (0x%08X)"), sent))
         }
 
         var raw = ""
@@ -333,7 +338,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Thread.sleep(forTimeInterval: 0.02)
             let response = getFeature(device, id: reportID, size: reportSize)
             guard response.result == kIOReturnSuccess else {
-                raw = String(format: "GetFeature falhou (0x%08X)", response.result)
+                raw = String(format: tr("GetFeature failed (0x%08X)"), response.result)
                 continue
             }
             let bytes = response.bytes
@@ -395,7 +400,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // percent preenche a bateria desenhada na barra; sem ele a bateria fica vazia (no cabo ou sem leitura).
     private func show(text: String, percent: Int? = nil, charging: Bool = false, state: String, raw: String) {
         stateItem.title = state
-        rawItem.title = "Resposta: \(raw)"
+        rawItem.title = tr("Response:") + " " + raw
         rawItem.isHidden = raw.isEmpty
         guard let button = statusItem.button else { return }
 
